@@ -1,6 +1,6 @@
 # NoVar - Visual Studio Extension
 
-<img align="right" width="160px" height="160px" src="img/novar.jpg">
+<img align="right" width="160px" height="120px" src="img/novar.jpg">
 
 NoVar is a Visual Studio extension designed to improve code readability by replacing `var` declarations with explicit types. This extension provides two main features that allow users to replace `var` based on their specific needs.
 
@@ -39,10 +39,10 @@ NoVar is a Visual Studio extension designed to improve code readability by repla
 ## Workflow
 
 ### Replace All Vars
-![Replace All Vars]()
+![Replace All Vars](https://github.com/prabhath6/NoVarExtension/blob/main/img/replace_all_vars.gif)
 
 ### Replace Vars Not Initialized with New
-![Replace Vars Not Initialized with New]()
+![Replace Vars Not Initialized with New](https://github.com/prabhath6/NoVarExtension/blob/main/img/replace_not_new_vars.gif)
 
 ## Contributing
 
