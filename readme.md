@@ -1,6 +1,7 @@
 # NoVar - Visual Studio Extension
+[![Build](https://github.com/prabhath6/NoVarExtension/actions/workflows/dotnet.yml/badge.svg?branch=main&event=push)](https://github.com/prabhath6/NoVarExtension/actions/workflows/dotnet.yml)
 
-<img align="right" width="160px" height="120px" src="img/novar.jpg">
+<img src="https://github.com/prabhath6/NoVarExtension/blob/main/img/novar.webp" align="right" width="160px" height="120px" >
 
 NoVar is a Visual Studio extension designed to improve code readability by replacing `var` declarations with explicit types. This extension provides two main features that allow users to replace `var` based on their specific needs.
 
