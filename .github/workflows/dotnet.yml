@@ -34,4 +34,3 @@ jobs:
 
     - name: Build
       run: msbuild NoVarExtension.sln /property:Configuration=Release /t:Rebuild
-      working-directory: NoVar
