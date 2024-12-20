@@ -1,6 +1,6 @@
 {
     "$schema": "http://json.schemastore.org/vsix-publish",
-    "categories": [ "Coding", "Tools"],
+    "categories": [ "Coding" ],
     "identity": {
         "internalName": "NoVar"
     },
