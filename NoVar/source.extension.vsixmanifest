@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
-        <Identity Id="NoVar.0c14e1a6-58d7-4ee5-803b-c41e0f7145f8"
+        <Identity Id="NoVar.743ecdd8-46b5-4239-9724-58d5e18e3d1d"
             Version="1.0.0"
             Language="en-US"
             Publisher="Prabhath Kiran Atmakuri" />
