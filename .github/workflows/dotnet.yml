@@ -58,7 +58,7 @@ jobs:
       continue-on-error: true
       run: |
         $VsixPublisher = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VSSDK\VisualStudioIntegration\Tools\Bin\VsixPublisher.exe"
-        & $VsixPublisher login -personalAccessToken "${{ secrets.PERSONALACCESSTOKEN }}" -publisherName PrabhathKiranAtmakuri
+        & $VsixPublisher login -personalAccessToken "${{ secrets.PERSONALACCESSTOKEN }}" -publisherName prabby
         & $VsixPublisher publish -payload Novar/NoVar-${{ env.VERSION }}.vsix -publishManifest NoVar/publish-manifest.json -ignoreWarnings 'VSIXValidatorWarning01,VSIXValidatorWarning02'
 
   Tag:
