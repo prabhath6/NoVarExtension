@@ -59,7 +59,7 @@ jobs:
       run: |
         $VsixPublisher = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VSSDK\VisualStudioIntegration\Tools\Bin\VsixPublisher.exe"
         & $VsixPublisher login -personalAccessToken ${{ secrets.MARKETPLACE_PAT }} -publisherName PrabhathKiranAtmakuri
-        & $VsixPublisher publish -payload NoVar-${{ env.VERSION }}.vsix -publishManifest NoVar/publish-manifest.json -ignoreWarnings 'VSIXValidatorWarning01,VSIXValidatorWarning02'
+        & $VsixPublisher publish -payload Novar/NoVar-${{ env.VERSION }}.vsix -publishManifest NoVar/publish-manifest.json -ignoreWarnings 'VSIXValidatorWarning01,VSIXValidatorWarning02'
 
   Tag:
     needs: build
