@@ -52,5 +52,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: Visual Studio Extension
-        path: |
-          *.vsix
+        path: Novar/*.vsix
