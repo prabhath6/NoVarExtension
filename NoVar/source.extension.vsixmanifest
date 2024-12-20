@@ -10,7 +10,7 @@
         <License>license.txt</License>
         <Icon>Resources\icon.jpg</Icon>
         <PreviewImage>Resources\icon.jpg</PreviewImage>
-        <Preview>true</Preview>
+        <Preview>false</Preview>
     </Metadata>
     <Installation>
         <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[17.0, 18.0)">

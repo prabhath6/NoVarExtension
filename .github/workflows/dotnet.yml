@@ -8,55 +8,56 @@ permissions:
 
 env:
   VERSION: 1.0.${{ github.run_number }}
-  NUGET_REPO_URL: 'https://api.nuget.org/v3/index.json'
+  NUGET_REPO_URL: "https://api.nuget.org/v3/index.json"
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   build:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Sets environment variables - branch-name
-      uses: nelonoel/branch-name@v1.0.1
-      
-    - name: Sets environment variables - Nerdbank.GitVersioning
-      uses: dotnet/nbgv@master
-      with:
-        setAllVars: true
+      - uses: actions/checkout@v4
+      - name: Sets environment variables - branch-name
+        uses: nelonoel/branch-name@v1.0.1
 
-    - name: Update Version
-      run: ((Get-Content -Path source.extension.vsixmanifest -Raw) -Replace "1.0", "${{ env.VERSION }}") | Set-Content -Path source.extension.vsixmanifest
-      working-directory: NoVar
-      shell: pwsh
-        
-    - name: Restore
-      run: dotnet restore NoVarExtension.sln
+      - name: Sets environment variables - Nerdbank.GitVersioningi
+        uses: dotnet/nbgv@master
+        with:
+          setAllVars: true
 
-    - name: Setup MSBuild.exe
-      uses: microsoft/setup-msbuild@v1.3
+      - name: Update Version
+        run: |
+          $version = "${{ env.NBGV_VERSION }}"
+          $version = $version -replace "\.\d+$", ""
+          (Get-Content -Path NoVar/source.extension.vsixmanifest -Raw) -Replace "1.0.0", $version | Set-Content -Path NoVar/source.extension.vsixmanifest
 
-    - name: Build
-      run: msbuild NoVarExtension.sln /property:Configuration=Release /t:Rebuild
+      - name: Restore
+        run: dotnet restore NoVarExtension.sln
 
-    - name: Move build output
-      run: mv bin/Release/NoVar.vsix NoVar-${{ env.VERSION }}.vsix
-      working-directory: NoVar
+      - name: Setup MSBuild.exe
+        uses: microsoft/setup-msbuild@v1.3
 
-    - name: Publish artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: Visual Studio Extension
-        path: Novar/*.vsix
+      - name: Build
+        run: msbuild NoVarExtension.sln /property:Configuration=Release /t:Rebuild
 
-    - name: Publish VSIX Packages
-      continue-on-error: true
-      run: |
+      - name: Move build output
+        run: mv bin/Release/NoVar.vsix NoVar-${{ env.VERSION }}.vsix
+        working-directory: NoVar
+
+      - name: Publish artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Visual Studio Extension
+          path: Novar/*.vsix
+
+      - name: Publish VSIX Packages
+        continue-on-error: true
+        run: |
           $VsixPublisher = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VSSDK\VisualStudioIntegration\Tools\Bin\VsixPublisher.exe"
           & $VsixPublisher login -personalAccessToken "${{ secrets.PERSONALACCESSTOKEN }}" -publisherName PrabhathKiranAtmakuri
           & $VsixPublisher publish -payload Novar/NoVar-${{ env.VERSION }}.vsix -publishManifest NoVar/publish-manifest.json -ignoreWarnings 'VSIXValidatorWarning01,VSIXValidatorWarning02'
@@ -65,38 +66,37 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-    
-    - name: Create tag
-      uses: actions/github-script@v7
-      with:
-        github-token: ${{ github.token }}
-        script: |
-          github.rest.git.createRef({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            ref: "refs/tags/${{ env.VERSION }}",
-            sha: context.sha
-          })
-          
-    - name: Create release
-      id: create-release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ env.VERSION }}
-        release_name: v${{ env.VERSION }}
-        draft: true
-        prerelease: false
-    - uses: actions/download-artifact@v4
-      with:
-        path: artifacts
-    - name: Upload VSIX asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create-release.outputs.upload_url }}
-        asset_path: artifacts/Visual Studio Extension/NoVar-${{ env.VERSION }}.vsix
-        asset_name: NoVar-${{ env.VERSION }}.vsix
-        asset_content_type: application/zip
+      - name: Create tag
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: "refs/tags/${{ env.VERSION }}",
+              sha: context.sha
+            })
+
+      - name: Create release
+        id: create-release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.VERSION }}
+          release_name: v${{ env.VERSION }}
+          draft: true
+          prerelease: false
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      - name: Upload VSIX asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create-release.outputs.upload_url }}
+          asset_path: artifacts/Visual Studio Extension/NoVar-${{ env.VERSION }}.vsix
+          asset_name: NoVar-${{ env.VERSION }}.vsix
+          asset_content_type: application/zip
