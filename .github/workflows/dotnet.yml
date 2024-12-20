@@ -31,7 +31,7 @@ jobs:
         setAllVars: true
 
     - name: Update Version
-      run: ((Get-Content -Path source.extension.vsixmanifest -Raw) -Replace "1.0.0", "${{ env.VERSION }}") | Set-Content -Path source.extension.vsixmanifest
+      run: ((Get-Content -Path source.extension.vsixmanifest -Raw) -Replace "1.0", "${{ env.VERSION }}") | Set-Content -Path source.extension.vsixmanifest
       working-directory: NoVar
       shell: pwsh
         
@@ -60,7 +60,6 @@ jobs:
           $VsixPublisher = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VSSDK\VisualStudioIntegration\Tools\Bin\VsixPublisher.exe"
           & $VsixPublisher login -personalAccessToken "${{ secrets.PERSONALACCESSTOKEN }}" -publisherName PrabhathKiranAtmakuri
           & $VsixPublisher publish -payload Novar/NoVar-${{ env.VERSION }}.vsix -publishManifest NoVar/publish-manifest.json -ignoreWarnings 'VSIXValidatorWarning01,VSIXValidatorWarning02'
-          & $VsixPublisher update -payload Novar/NoVar-${{ env.VERSION }}.vsix -publishManifest NoVar/publish-manifest.json -ignoreWarnings 'VSIXValidatorWarning01,VSIXValidatorWarning02'
 
   Tag:
     needs: build
