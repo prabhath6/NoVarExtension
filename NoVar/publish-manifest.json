@@ -1,0 +1,13 @@
+{
+    "$schema": "http://json.schemastore.org/vsix-publish",
+    "categories": [ "Coding", "Tools"],
+    "identity": {
+        "internalName": "NoVar"
+    },
+    "overview": "../readme.md",
+    "priceCategory": "free",
+    "publisher": "PrabhathKiranAtmakuri",
+    "private": false,
+    "qna": false,
+    "repo": "https://github.com/prabhath6/NoVarExtension"
+}
