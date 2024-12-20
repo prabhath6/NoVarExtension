@@ -31,8 +31,8 @@ jobs:
         setAllVars: true
 
     - name: Update Version
-      run: ((Get-Content -Path VSPackage/source.extension.vsixmanifest -Raw) -Replace "1.0.0", "${{ env.VERSION }}") | Set-Content -Path VSPackage/source.extension.vsixmanifest
-      working-directory: src
+      run: ((Get-Content -Path NoVar/source.extension.vsixmanifest -Raw) -Replace "1.0.0", "${{ env.VERSION }}") | Set-Content -Path NoVar/source.extension.vsixmanifest
+      working-directory: NoVar
       shell: pwsh
         
     - name: Restore
