@@ -46,7 +46,7 @@ jobs:
         run: msbuild NoVarExtension.sln /property:Configuration=Release /t:Rebuild
 
       - name: Move build output
-        run: mv bin/Release/NoVar.vsix NoVar-${{ env.VERSION }}.vsix
+        run: mv bin/Release/NoVar.vsix NoVar-${{ env.NBGV_VERSION }}.vsix
         working-directory: NoVar
 
       - name: Publish artifacts
@@ -60,7 +60,7 @@ jobs:
         run: |
           $VsixPublisher = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VSSDK\VisualStudioIntegration\Tools\Bin\VsixPublisher.exe"
           & $VsixPublisher login -personalAccessToken "${{ secrets.PERSONALACCESSTOKEN }}" -publisherName PrabhathKiranAtmakuri
-          & $VsixPublisher publish -payload Novar/NoVar-${{ env.VERSION }}.vsix -publishManifest NoVar/publish-manifest.json -ignoreWarnings 'VSIXValidatorWarning01,VSIXValidatorWarning02'
+          & $VsixPublisher publish -payload Novar/NoVar-${{ env.NBGV_VERSION }}.vsix -publishManifest NoVar/publish-manifest.json -ignoreWarnings 'VSIXValidatorWarning01,VSIXValidatorWarning02'
 
   Tag:
     needs: build
@@ -74,7 +74,7 @@ jobs:
             github.rest.git.createRef({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              ref: "refs/tags/${{ env.VERSION }}",
+              ref: "refs/tags/${{ env.NBGV_VERSION }}",
               sha: context.sha
             })
 
@@ -85,7 +85,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ env.VERSION }}
-          release_name: v${{ env.VERSION }}
+          release_name: v${{ env.NBGV_VERSION }}
           draft: true
           prerelease: false
       - uses: actions/download-artifact@v4
@@ -97,6 +97,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create-release.outputs.upload_url }}
-          asset_path: artifacts/Visual Studio Extension/NoVar-${{ env.VERSION }}.vsix
-          asset_name: NoVar-${{ env.VERSION }}.vsix
+          asset_path: artifacts/Visual Studio Extension/NoVar-${{ env.NBGV_VERSION }}.vsix
+          asset_name: NoVar-${{ env.NBGV_VERSION }}.vsix
           asset_content_type: application/zip
