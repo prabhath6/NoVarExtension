@@ -46,6 +46,9 @@
     <WarningLevel>4</WarningLevel>
     <CopyVsixExtensionFiles>False</CopyVsixExtensionFiles>
   </PropertyGroup>
+  <PropertyGroup>
+    <RuntimeIdentifiers>win10-arm;win10-arm-aot;win10-arm64-aot;win10-x86;win10-x86-aot;win10-x64;win10-x64-aot</RuntimeIdentifiers>
+  </PropertyGroup>
   <ItemGroup>
     <Compile Include="Commands\ReplaceNotNewVars.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
