@@ -58,7 +58,7 @@ jobs:
       continue-on-error: true
       run: |
         $VsixPublisher = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VSSDK\VisualStudioIntegration\Tools\Bin\VsixPublisher.exe"
-        & $VsixPublisher login -personalAccessToken "${{ secrets.PERSONALACCESSTOKEN }}" -publisherName 'Prabhath Kiran Atmakuri'
+        & $VsixPublisher login -personalAccessToken "${{ secrets.PERSONALACCESSTOKEN }}" -publisherName PrabhathKiranAtmakuri
         & $VsixPublisher publish -payload Novar/NoVar-${{ env.VERSION }}.vsix -publishManifest NoVar/publish-manifest.json -ignoreWarnings 'VSIXValidatorWarning01,VSIXValidatorWarning02'
 
   Tag:
@@ -82,7 +82,7 @@ jobs:
       id: create-release
       uses: actions/create-release@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
       with:
         tag_name: ${{ env.VERSION }}
         release_name: v${{ env.VERSION }}
@@ -94,7 +94,7 @@ jobs:
     - name: Upload VSIX asset
       uses: actions/upload-release-asset@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
       with:
         upload_url: ${{ steps.create-release.outputs.upload_url }}
         asset_path: artifacts/Visual Studio Extension/NoVar-${{ env.VERSION }}.vsix
