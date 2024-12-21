@@ -37,6 +37,9 @@ jobs:
       - name: Restore
         run: dotnet restore NoVarExtension.sln
 
+      - name: Test
+        run: dotnet test NoVarExtension.sln --no-build --verbosity normal
+
       - name: Setup MSBuild.exe
         uses: microsoft/setup-msbuild@v1.3
 
