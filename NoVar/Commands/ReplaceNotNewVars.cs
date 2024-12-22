@@ -1,4 +1,7 @@
-﻿using NoVar.src.Helpers;
+﻿using EnvDTE;
+using Microsoft.VisualStudio.Threading;
+using NoVar.src.Helpers;
+using System.Threading.Tasks;
 
 namespace NoVar.Commands
 {
@@ -9,11 +12,23 @@ namespace NoVar.Commands
 		{
 			try
 			{
+				await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+
+				// Get the DTE object
+				DTE dte = ServiceProvider.GlobalProvider.GetService(typeof(DTE)) as DTE;
+				string solutionPath = dte?.Solution?.FullName;
+
+				if (string.IsNullOrEmpty(solutionPath))
+				{
+					System.Diagnostics.Debug.WriteLine("No solution is currently open.");
+					return;
+				}
+
 				// Get current document
-				DocumentView docView = await VS.Documents.GetActiveDocumentViewAsync().ConfigureAwait(false);
+				DocumentView docView = await VS.Documents.GetActiveDocumentViewAsync();
 				if (docView != null)
 				{
-					await VarReplacerHelper.ReplaceVarsAsync(docView.FilePath, docView.TextView, replaceAll: false);
+					await VarReplacerHelper.ReplaceVarsAsync(solutionPath, docView.FilePath, docView.TextView, replaceAll: false);
 				}
 			}
 			catch (Exception ex)

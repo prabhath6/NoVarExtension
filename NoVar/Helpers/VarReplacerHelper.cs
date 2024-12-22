@@ -5,70 +5,92 @@ using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text;
 using System.Collections.Generic;
 using System.Linq;
+using System.IO;
+using Microsoft.CodeAnalysis.MSBuild;
+using NoVar.Helpers;
 
 namespace NoVar.src.Helpers
 {
 	public static class VarReplacerHelper
 	{
-		public static async Task ReplaceVarsAsync(string filePath, ITextView textView, bool replaceAll)
+		public static async Task ReplaceVarsAsync(string solutionPath, string filePath, ITextView textView, bool replaceAll)
 		{
 			if (filePath != null)
 			{
-				bool isCSharpFile = IsCSharpFile(filePath);
-
-				if (isCSharpFile)
+				if (IsCSharpFile(filePath))
 				{
-					// Get the text view and snapshot
-					ITextSnapshot textSnapshot = textView.TextSnapshot;
+					// Create an MSBuild workspace and load the solution
+					using MSBuildWorkspace workspace = MSBuildWorkspace.Create();
+					Microsoft.CodeAnalysis.Solution solution = await workspace.OpenSolutionAsync(solutionPath);
 
-					string documentText = textSnapshot.GetText();
+					// Find the project containing the file
+					Microsoft.CodeAnalysis.Project project = solution
+						.Projects
+						.FirstOrDefault(p => p.Documents.Any(d => d.FilePath == filePath));
 
-					// Parse the document with Roslyn
-					SyntaxTree tree = CSharpSyntaxTree.ParseText(documentText);
-
-					// Get the semantic model
-					IEnumerable<MetadataReference> references = AppDomain.CurrentDomain.GetAssemblies()
-						.Where(a => !a.IsDynamic)
-						.Select(a => MetadataReference.CreateFromFile(a.Location))
-						.Cast<MetadataReference>();
-
-					CSharpCompilation compilation = CSharpCompilation.Create("Analysis")
-						.AddReferences(references)
-						.AddSyntaxTrees(tree);
-
-					SemanticModel semanticModel = compilation.GetSemanticModel(tree);
-
-					// Find all 'var' declarations
-					SyntaxNode root = await tree.GetRootAsync().ConfigureAwait(false);
-					IEnumerable<VariableDeclarationSyntax> variableDeclarationSyntaxes = from variableDeclaration in root.DescendantNodes().OfType<VariableDeclarationSyntax>()
-																						 where variableDeclaration.Type.IsVar &&
-																							   (replaceAll || variableDeclaration.Variables.Any(v => !(v.Initializer?.Value is ObjectCreationExpressionSyntax)))
-																						 select variableDeclaration;
-					string newDocumentText = documentText;
-
-					// Process each 'var' declaration
-					foreach (VariableDeclarationSyntax varDecl in variableDeclarationSyntaxes.Reverse())
+					if (project != null)
 					{
-						foreach (VariableDeclaratorSyntax variable in varDecl.Variables)
-						{
-							ILocalSymbol variableSymbol = semanticModel.GetDeclaredSymbol(variable) as ILocalSymbol;
-							if (variableSymbol != null)
-							{
-								string variableName = variableSymbol.Name;
-								string variableType = variableSymbol.Type.ToString();
+						Document document = project.Documents.FirstOrDefault(d => d.FilePath == filePath);
 
-								// Find the line and where in the line is the 'var' declaration
-								Microsoft.CodeAnalysis.Text.TextSpan varTextSpan = varDecl.Type.Span;
-								newDocumentText = newDocumentText.Remove(varTextSpan.Start, varTextSpan.Length).Insert(varTextSpan.Start, variableType);
+						if (document != null)
+						{
+							// Build the compilation options
+							CSharpCompilationOptions compilationOptions = new(OutputKind.DynamicallyLinkedLibrary);
+
+							// Collect references including DLLs from bin folders
+							List<MetadataReference> references = [];
+
+							// Add references from the project's bin directory
+							string outputPath = project.OutputFilePath;
+							if (!string.IsNullOrEmpty(outputPath) && File.Exists(outputPath))
+							{
+								references.Add(MetadataReference.CreateFromFile(outputPath));
 							}
+
+							// Add references to necessary system assemblies
+							IEnumerable<PortableExecutableReference> assemblies = AppDomain.CurrentDomain.GetAssemblies()
+								.Where(a => !a.IsDynamic && !string.IsNullOrEmpty(a.Location))
+								.Select(a => MetadataReference.CreateFromFile(a.Location));
+							references.AddRange(assemblies);
+
+							// Create the compilation
+							SyntaxTree syntaxTree = await document.GetSyntaxTreeAsync();
+							Compilation compilation = CSharpCompilation.Create(
+								"Analysis",
+								syntaxTrees: [syntaxTree],
+								references: references,
+								options: compilationOptions);
+
+							// Get the semantic model from the compilation
+							SemanticModel semanticModel = compilation.GetSemanticModel(syntaxTree);
+
+							// Get the syntax root
+							SyntaxNode root = await syntaxTree.GetRootAsync();
+
+							// Use a rewriter to replace 'var' with the actual type
+							VarTypeRewriter rewriter = new(semanticModel, replaceAll);
+							SyntaxNode newRoot = rewriter.Visit(root);
+
+							// Get the updated document text
+							string newDocumentText = newRoot.GetText().ToString();
+
+							// Get the text view and snapshot
+							ITextSnapshot textSnapshot = textView.TextSnapshot;
+							string documentText = textSnapshot.GetText();
+
+							// Update the document with the new text
+							using ITextEdit edit = textView.TextBuffer.CreateEdit();
+							edit.Replace(0, textSnapshot.Length, newDocumentText);
+							edit.Apply();
+						}
+						else
+						{
+							System.Diagnostics.Debug.WriteLine($"Document {filePath} not found in the project.");
 						}
 					}
-
-					// Update the document with the new text
-					using (ITextEdit edit = textView.TextBuffer.CreateEdit())
+					else
 					{
-						edit.Replace(0, textSnapshot.Length, newDocumentText);
-						edit.Apply();
+						System.Diagnostics.Debug.WriteLine($"Project containing the file {filePath} not found in the solution.");
 					}
 				}
 			}
@@ -76,9 +98,7 @@ namespace NoVar.src.Helpers
 
 		private static bool IsCSharpFile(string filePath)
 		{
-			string fileExtension = System.IO.Path.GetExtension(filePath);
-
-			return fileExtension == ".cs";
+			return Path.GetExtension(filePath).Equals(".cs", StringComparison.OrdinalIgnoreCase);
 		}
 	}
- }
+}

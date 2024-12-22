@@ -33,9 +33,9 @@ NoVar is a Visual Studio extension designed to improve code readability by repla
    - Click "Download" and follow the instructions to install the extension.
 
 2. **From GitHub**:
-   - Clone the repository: `git clone https://github.com/yourusername/NoVar.git`
-   - Open the solution in Visual Studio.
-   - Build the solution and install the extension.
+   - Find the VSIX file the [repository](https://github.com/prabhath6/NoVarExtension/releases)
+   - Download the file.
+   - Install the extension.
 
 ## Workflow
 
